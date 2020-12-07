@@ -7,7 +7,7 @@ This person you can find on repl.it called CSharpIsGud or Star Trek on Discord -
 
 This is a Python interpreter made in C++. Now obviously its not going to be as faster as the original C interpreter but I just wanted to make one.
 
-### What it can and can't do
+### What it can and can't do / TODO
 
 #### What it Can
 - [x] Strings
@@ -16,16 +16,21 @@ This is a Python interpreter made in C++. Now obviously its not going to be as f
 - [x] Function Calls
 - [x] Built-in Native C++ functions
 - [x] Return values / Return from function
+- [x] Integers
+- [x] If statements (Somewhat)
+- [x] Errors - Not to useful though
+- [x] Implicit Type Conversion
 
 #### What it Can't
-- [ ] Integers
+- [ ] Booleans
 - [ ] Floating Point (AKA doubles)
 - [ ] Lists
 - [ ] Dictionaries
 - [ ] For / While Loops
-- [ ] If statements
 - [ ] Import / Import from
 - [ ] Docstrings
 - [ ] Types
 - [ ] Explicit Type Conversion
 - [ ] Properties
+- [ ] Classes
+- [ ] Decorators
