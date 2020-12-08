@@ -7,6 +7,13 @@ This person you can find on repl.it called CSharpIsGud or Star Trek on Discord -
 
 This is a Python interpreter made in C++. Now obviously its not going to be as faster as the original C interpreter but I just wanted to make one.
 
+### How it Looks
+
+This is how it looks:
+![Crasy](imgs/pyfail.png)
+
+Looks "similar" to the python3 interperter with the traceback. But it isn't too useful / meaningful yet
+
 ### What it can and can't do / TODO
 
 #### What it Can
