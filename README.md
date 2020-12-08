@@ -20,6 +20,7 @@ This is a Python interpreter made in C++. Now obviously its not going to be as f
 - [x] If statements (Somewhat)
 - [x] Errors - Not to useful though
 - [x] Implicit Type Conversion
+- [x] Explicit Type Conversion (Str and Int rn)
 
 #### What it Can't
 - [ ] Booleans
@@ -30,7 +31,6 @@ This is a Python interpreter made in C++. Now obviously its not going to be as f
 - [ ] Import / Import from
 - [ ] Docstrings
 - [ ] Types
-- [ ] Explicit Type Conversion
 - [ ] Properties
 - [ ] Classes
 - [ ] Decorators
