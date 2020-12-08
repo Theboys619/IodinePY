@@ -1,6 +1,9 @@
 #pragma once
 #include "pyParser.hpp"
 
+// I needed inspiration to do this so some credit goes to @CSharpIsGud because I looked at his IodineJS / JS Interpreter
+// I didn't copy and paste and somethings I changed to work for PY but yea Credit to him for a bit of the interpreter
+
 namespace pyInterp {
   enum class PyTypes {
     Dictionary,
@@ -13,7 +16,7 @@ namespace pyInterp {
   };
 
   class PyScope;
-  class PyValue {
+  class PyValue { // Main Dynamic Value class
     public:
 
     PyTypes type;
@@ -26,6 +29,22 @@ namespace pyInterp {
 
     virtual std::string getType() {
       return "value";
+    }
+
+    virtual bool HasProp(std::string propName) {
+      return properties.find(propName) != properties.end();
+    }
+
+    virtual std::string getPropString(std::string prop) {
+      if (!HasProp(prop)) return "";
+
+      return properties[prop]->toString();
+    }
+
+    virtual int getPropInt(std::string prop) {
+      if (!HasProp(prop)) return -1;
+
+      return properties[prop]->toInt();
     }
 
     int toInt() {
@@ -266,7 +285,7 @@ namespace pyInterp {
       return "function";
     }
 
-    virtual std::string toString() {
+    virtual std::string toString() { // Overwritable - Is that the write word? Writable?
       std::stringstream str;
       str << "<function " << properties["__name__"]->toString() << " at 0x" << static_cast<const void*>(this) << ">";
       return str.str();
@@ -279,7 +298,7 @@ namespace pyInterp {
     Expression* ast;
     PyScope* Scope;
 
-    Interpreter(Expression* ast): ast(ast) {
+    Interpreter(Expression* ast): ast(ast) { // What is this?
       Scope = new PyScope();
     }
 
@@ -287,7 +306,7 @@ namespace pyInterp {
       Scope = scope;
     }
 
-    PyValue* iReturn(Expression* exp, PyScope* scope) {
+    PyValue* iReturn(Expression* exp, PyScope* scope) { // Anything prefixed with "i" just means interpret
       PyValue* returnStmt = Evaluate(exp->scope, scope);
       returnStmt->isReturnValue = true;
 
@@ -393,7 +412,7 @@ namespace pyInterp {
       return Evaluate(ast, Scope);
     }
 
-    PyValue* Evaluate(Expression* exp, PyScope* scope) {
+    PyValue* Evaluate(Expression* exp, PyScope* scope) { // Main evaluation using capital letter becasuse it looks nicer when doing interpreter->
       switch (exp->type) {
         case ExprTypes::Scope:
           return iScope(exp, scope);
@@ -427,12 +446,21 @@ namespace pyInterp {
     }
   };
 
-  PyValue* PyFunction::Call(std::vector<Expression*> args, PyScope* scope) {
+  PyValue* PyFunction::Call(std::vector<Expression*> args, PyScope* scope) { // Going to Clean this Up eventually and make something a lot nicer and easier to use
     std::vector<PyValue*> pyValues = {};
 
-    if (this->Func != nullptr) {
+    if (this->Func != nullptr) { // WHy?
       for (Expression* arg : args) {
-        pyValues.push_back(interpreter->Evaluate(arg, scope));
+        if (arg->type == ExprTypes::Assign) {
+          PyValue* argValue = interpreter->Evaluate(arg->right, scope);
+          argValue->properties["__ARGNAME__"] = new PyValue(arg->left->value.getString());
+          pyValues.insert(pyValues.begin(), argValue);
+          continue;          
+        } else {
+          PyValue* argValue = interpreter->Evaluate(arg, scope);
+          argValue->properties["__ARGNAME__"] = new PyValue(0);
+          pyValues.push_back(argValue);
+        }
       }
       
       PyValue* returnVal = this->Func(pyValues);
@@ -442,7 +470,11 @@ namespace pyInterp {
     PyValue* returnVal = new PyValue();
 
     for (int i = 0; i < paramNames.size(); i++) {
-      scope->Define(paramNames[i], interpreter->Evaluate(args[i], scope));
+      if (args[i]->type == ExprTypes::Assign) { // Yea these if statements need to go or I need to change something this is quite long
+        interpreter->Evaluate(args[i], scope);
+      } else {
+        scope->Define(paramNames[i], interpreter->Evaluate(args[i], scope));
+      }
     }
 
     for (Expression* expr : block) {

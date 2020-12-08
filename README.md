@@ -28,8 +28,10 @@ Looks "similar" to the python3 interperter with the traceback. But it isn't too 
 - [x] Errors - Not to useful though
 - [x] Implicit Type Conversion
 - [x] Explicit Type Conversion (Str and Int rn)
+- [x] Native Function Named Parameters
 
 #### What it Can't
+- [ ] User Defined Named Parameters
 - [ ] Booleans
 - [ ] Floating Point (AKA doubles)
 - [ ] Lists

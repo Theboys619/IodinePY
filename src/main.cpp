@@ -34,11 +34,27 @@ PyValue* input(std::vector<PyValue*> args) {
 }
 
 PyValue* print(std::vector<PyValue*> args) {
+  std::string ending = "\n";
+  std::string sep = " ";
+
+  bool isFirst = true;
+
   for (auto arg : args) {
+    if (arg->properties["__ARGNAME__"]->toString() == "end") { // Very disgusting for built in functions maybe I can have like another arguemtns or someway to access named params?
+      ending = arg->toString();
+      continue;
+    } else if (arg->properties["__ARGNAME__"]->toString() == "sep") {
+      sep = arg->toString();
+      continue;
+    }
+
+    if (isFirst) isFirst = false;
+    else std::cout << sep;
+
     std::cout << arg->toString();
   }
 
-  std::cout << std::endl;
+  std::cout << ending;
 
   return nullptr;
 }
@@ -66,7 +82,6 @@ int main(void) {
   globals->Set("input", new PyFunction(interpreter, input));
   globals->Set("str", new PyFunction(interpreter, pystr));
   globals->Set("int", new PyFunction(interpreter, pyint));
-
 
   interpreter->SetGlobals(globals);
   try {

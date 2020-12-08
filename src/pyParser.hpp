@@ -147,6 +147,7 @@ namespace pyInterp {
           isFirst = false;
         } else {
           skipOverVal(separator, curTok);
+          skipWhitespace();
         }
 
         Expression* val = pExpression();
