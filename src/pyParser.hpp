@@ -173,11 +173,13 @@ namespace pyInterp {
       advance();
 
       while (!isEOF()) {
-        // std::cout << "Size: " << indentSize << " Value: " << curTok.getString() << " Type: " << curTok.type << std::endl;
+        // std::cout << "isFirst: " << (isFirst ? "true" : "false") << std::endl;
+        // std::cout << "Size: " << indentSize << " Value: " << curTok.getString() << " Type: " << curTok.type << std::endl << std::endl;
         if (isFirst) {
           isFirst = false;
         } else {
-          skipOver("Linebreak", "\n");
+          if (isType("Whitespace", indentSpace, peek()))
+            skipOver("Linebreak", "\n");
 
           if (!isType("Whitespace", indentSpace)) {
             break;
@@ -186,7 +188,7 @@ namespace pyInterp {
           }
         }
 
-        // std::cout << "Value: " << curTok.getString() << " Type: " << curTok.type << std::endl;
+        // std::cout << "Value: " << curTok.getString() << " Type: " << curTok.type << std::endl << std::endl;
 
         expressions.push_back(pExpression());
       }

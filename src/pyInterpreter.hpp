@@ -268,7 +268,7 @@ namespace pyInterp {
 
     virtual std::string toString() {
       std::stringstream str;
-      str << "<function " << properties["__name__"]->toString() << " at " << static_cast<const void*>(this);
+      str << "<function " << properties["__name__"]->toString() << " at 0x" << static_cast<const void*>(this) << ">";
       return str.str();
     }
   };

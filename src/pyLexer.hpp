@@ -74,11 +74,11 @@ namespace pyInterp {
     { "else", "Keyword" },
     { "return", "Keyword" },
 
-    { "char", "Datatype" },
-    { "string", "Datatype" },
-    { "int", "Datatype" },
-    { "float", "Datatype" },
-    { "void", "Datatype" }
+    // { "char", "Datatype" },
+    // { "string", "Datatype" },
+    // { "int", "Datatype" },
+    // { "float", "Datatype" },
+    // { "void", "Datatype" }
   };
 
   class Lexer {

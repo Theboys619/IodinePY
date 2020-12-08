@@ -1,7 +1,17 @@
-x = "Hi " * 4 # An error should have thrown early because I tried to divide a string
+x = "Hi " * 4
 print(x)
 
-def sayNo():
-  print("No")
+y = int(input("Enter a number: "))
+print(y * 2)
+print()
 
+def sayNo():
+  def test():
+    print("Nice")
+    if x == "Hi Hi Hi Hi ":
+      print("X has four Hi s")
+
+  print("No")
+  test()
 sayNo()
+test()

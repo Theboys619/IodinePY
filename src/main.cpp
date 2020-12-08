@@ -3,6 +3,46 @@
 
 using namespace pyInterp;
 
+PyValue* pystr(std::vector<PyValue*> args) {
+  if (args.size() > 0)
+    return new PyValue(args[0]->toString());
+  else
+    return nullptr;
+}
+
+PyValue* pyint(std::vector<PyValue*> args) {
+  if (args.size() > 0) {
+    if (args[0]->type == PyTypes::String)
+      return new PyValue(args[0]->toInt());
+    else if (args[0]->type == PyTypes::Int) return new PyValue(args[0]->toInt());
+    else return new PyValue(0);
+  } else
+    return new PyValue(0);
+}
+
+PyValue* input(std::vector<PyValue*> args) {
+  if (args.size() > 0) {
+    std::string msg = args[0]->toString();
+    std::cout << msg;
+  }
+
+  std::string x;
+
+  std::getline(std::cin, x);
+
+  return new PyValue(x);
+}
+
+PyValue* print(std::vector<PyValue*> args) {
+  for (auto arg : args) {
+    std::cout << arg->toString();
+  }
+
+  std::cout << std::endl;
+
+  return nullptr;
+}
+
 int main(void) {
   std::string data = readFile("./tests/main.py");
 
@@ -22,13 +62,11 @@ int main(void) {
   Interpreter* interpreter = new Interpreter(ast);
 
   PyScope* globals = new PyScope();
-  globals->Set("print", new PyFunction(interpreter, [](std::vector<PyValue*> args) -> PyValue* {
-    for (auto arg : args) {
-      std::cout << arg->toString() << std::endl;
-    }
+  globals->Set("print", new PyFunction(interpreter, print));
+  globals->Set("input", new PyFunction(interpreter, input));
+  globals->Set("str", new PyFunction(interpreter, pystr));
+  globals->Set("int", new PyFunction(interpreter, pyint));
 
-    return nullptr;
-  }));
 
   interpreter->SetGlobals(globals);
   try {
