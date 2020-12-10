@@ -74,6 +74,10 @@ namespace pyInterp {
     { "else", "Keyword" },
     { "return", "Keyword" },
 
+    { "import", "Keyword" },
+    { "from", "Keyword" },
+    { "as", "Keyword" },
+
     // { "char", "Datatype" },
     // { "string", "Datatype" },
     // { "int", "Datatype" },

@@ -27,6 +27,13 @@ namespace pyInterp {
 
     bool isReturnValue = false;
 
+    PyValue* Get(std::string propName) {
+      if (!HasProp(propName))
+        throw Error("Property " + propName + " is undefined");
+      
+      return properties[propName];
+    } 
+
     virtual std::string getType() {
       return "value";
     }
@@ -35,16 +42,16 @@ namespace pyInterp {
       return properties.find(propName) != properties.end();
     }
 
-    virtual std::string getPropString(std::string prop) {
-      if (!HasProp(prop)) return "";
+    virtual std::string getPropString(std::string propName) {
+      if (!HasProp(propName)) return "";
 
-      return properties[prop]->toString();
+      return properties[propName]->toString();
     }
 
-    virtual int getPropInt(std::string prop) {
-      if (!HasProp(prop)) return -1;
+    virtual int getPropInt(std::string propName) {
+      if (!HasProp(propName)) return -1;
 
-      return properties[prop]->toInt();
+      return properties[propName]->toInt();
     }
 
     int toInt() {
@@ -102,6 +109,10 @@ namespace pyInterp {
       value = nullptr;
     }
     PyValue(std::string val) {
+      type = PyTypes::String;
+      value = new std::string(val);
+    }
+    PyValue(const char* val) {
       type = PyTypes::String;
       value = new std::string(val);
     }
@@ -298,12 +309,29 @@ namespace pyInterp {
     Expression* ast;
     PyScope* Scope;
 
+    Interpreter() { Scope = new PyScope(); }
     Interpreter(Expression* ast): ast(ast) { // What is this?
       Scope = new PyScope();
     }
 
     void SetGlobals(PyScope* scope) { // TBH Could just let them pass one in the Interpret Method
       Scope = scope;
+    }
+
+    std::string getIdentifier(Expression* exp) {
+      switch (exp->type) {
+        case ExprTypes::Identifier:
+          return exp->value.getString();
+        
+        case ExprTypes::FunctionCall:
+          return exp->value.getString();
+
+        case ExprTypes::Assign:
+          return exp->left->value.getString();
+
+        default:
+          throw Error("Invalid token");
+      }
     }
 
     PyValue* iReturn(Expression* exp, PyScope* scope) { // Anything prefixed with "i" just means interpret
@@ -328,8 +356,48 @@ namespace pyInterp {
       return val;
     }
 
+    PyValue* iDotOp(Expression* exp, PyScope* scope, PyValue* value) {
+      std::string name = exp->value.getString();
+      std::string propName = getIdentifier(exp->dotOp);
+      PyValue* propValue = value->Get(propName);
+
+      bool isFunction = propValue->getType() == "function";
+
+      switch (exp->dotOp->type) {
+        case ExprTypes::FunctionCall: {
+          if (isFunction) {
+            PyValue* retVal = ((PyFunction*)propValue)->Call(exp->dotOp->args, scope->Extend());
+            if (exp->dotOp->dotOp != nullptr) {
+              return iDotOp(exp->dotOp, scope, retVal);
+            }
+            
+            return retVal;
+          } else {
+            throw Error("Not a callable function");
+          }
+        }
+
+        case ExprTypes::Identifier: {
+          if (exp->dotOp->dotOp != nullptr) {
+            return iDotOp(exp->dotOp, scope, propValue);
+          }
+
+          return propValue;
+        }
+
+        default:
+          throw Error("Unknown token after accessing property.");
+      }
+    }
+
     PyValue* iIdentifier(Expression* exp, PyScope* scope) {
-      return scope->Get(exp->value.getString());
+      PyValue* value = scope->Get(exp->value.getString());
+
+      if (exp->dotOp != nullptr) {
+        return iDotOp(exp, scope, value);
+      }
+
+      return value;
     }
 
     PyValue* iAssignment(Expression* exp, PyScope* scope) {
@@ -365,7 +433,12 @@ namespace pyInterp {
       PyValue* function = scope->Get(funcName);
 
       if (function->getType() == "function") {
-        return ((PyFunction*)function)->Call(exp->args, scope->Extend());
+        PyValue* value = ((PyFunction*)function)->Call(exp->args, scope->Extend());
+        if (exp->dotOp != nullptr) {
+          return iDotOp(exp, scope, value);
+        }
+        
+        return value;
       } else {
         throw Error("Not a callable function");
       }
@@ -409,6 +482,13 @@ namespace pyInterp {
     }
 
     PyValue* Interpret() {
+      return Evaluate(ast, Scope);
+    }
+
+    PyValue* Interpret(std::string input) {
+      Lexer lexer = Lexer(input);
+      Parser parser = Parser(lexer.tokenize());
+      ast = parser.parse();
       return Evaluate(ast, Scope);
     }
 

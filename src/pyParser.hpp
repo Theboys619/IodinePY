@@ -138,7 +138,7 @@ namespace pyInterp {
       bool isFirst = true;
 
       skipOverVal(start, curTok);
-      if (isIgnore(curTok)) advance();
+      skipWhitespace();
 
       while (!isEOF()) {
         if (isType("Delimiter", end)) {
@@ -213,6 +213,21 @@ namespace pyInterp {
       );
     }
 
+    bool pDotOp(Expression* exp) {
+      if (isType("Delimiter", ".", peek())) {
+        skipWhitespace();
+        advance();
+        exp->dotOp = pExpression();
+        return true;
+      } else if (isType("Delimiter", ".")) {
+        advance();
+        exp->dotOp = pExpression();
+        return true;
+      }
+
+      return false;
+    }
+
     Expression* isCall(Expression* expression) {
       return isType("Delimiter", "(", peek()) && nonCallabes(expression) ? pCall(expression) : expression;
     }
@@ -223,6 +238,9 @@ namespace pyInterp {
 
       Expression* funcCall = new Expression(ExprTypes::FunctionCall, expr->value);
       funcCall->args = pDelimiters("(", ")", ",");
+      funcCall->dotOp = nullptr;
+
+      pDotOp(funcCall);
 
       return funcCall;
     }
@@ -255,14 +273,12 @@ namespace pyInterp {
 
     Expression* pIdentifier(Expression* oldTok) {
       oldTok->type = ExprTypes::Identifier;
+      oldTok->dotOp = nullptr;
 
       if (!isType("Delimiter", "(", peek()))
         advance();
 
-      if (isType("Delimiter", ".")) {
-        advance();
-        oldTok->dotOp = pExpression();
-      }
+      pDotOp(oldTok);
 
       skipWhitespace();
 
